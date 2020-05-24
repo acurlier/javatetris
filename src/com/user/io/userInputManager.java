@@ -1,5 +1,7 @@
 package com.user.io;
+
 import java.util.Scanner;
+
 // import java.util.*;
 
 public class userInputManager {
@@ -23,16 +25,11 @@ public class userInputManager {
         }
     }
 
-    public static void keyBoardInput() {
-
-
-//        System.out.println("Keyboard input detected:");
-//        newAction = "Enter";
-//        lastAction = "";
-
+    public static void keyStrokeInterceptor() {
     }
 
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         userInputManager user_io = new userInputManager();
 //        userInputManager.keyBoardInput();
     }
