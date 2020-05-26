@@ -1,18 +1,13 @@
 package com.user.io;
 
 import javafx.application.Application;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -20,7 +15,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.TextArea;
 
 
-public class UserDisplay extends Application implements EventHandler<KeyEvent>{
+public class UserDisplay extends Application {
 
     private final TextArea loggingArea = new TextArea("");
 
@@ -57,7 +52,33 @@ public class UserDisplay extends Application implements EventHandler<KeyEvent>{
         loggingArea.requestFocus();
 
         ///////CONFIGURE UI EVENT HANDLING
-        loggingArea.setOnKeyPressed(this);
+
+        loggingArea.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent keyEvent) {
+                switch (keyEvent.getCode()) {
+                    case UP -> loggingArea.setText("UP key press detected");
+                    case LEFT -> loggingArea.setText("LEFT key press detected");
+                    case RIGHT -> loggingArea.setText("RIGHT key press detected");
+                    case DOWN -> loggingArea.setText("DOWN key press detected");
+                    case SPACE -> loggingArea.setText("SPACE key press detected");
+                    case CONTROL -> loggingArea.setText("CTRL key press detected");
+                    default -> loggingArea.setText("Invalid key pressed");
+                }
+            }
+            });
+
+        loggingArea.setOnKeyPressed(keyEvent -> {
+            switch (keyEvent.getCode()) {
+                case UP -> loggingArea.setText("UP key press detected");
+                case LEFT -> loggingArea.setText("LEFT key press detected");
+                case RIGHT -> loggingArea.setText("RIGHT key press detected");
+                case DOWN -> loggingArea.setText("DOWN key press detected");
+                case SPACE -> loggingArea.setText("SPACE key press detected");
+                case CONTROL -> loggingArea.setText("CTRL key press detected");
+                default -> loggingArea.setText("Invalid key pressed");
+            }
+        });
 
         ///////DISPLAY UI
         primaryStage.setScene(scene);
@@ -65,18 +86,6 @@ public class UserDisplay extends Application implements EventHandler<KeyEvent>{
 
     }
 
-    // method to handle key press
-    @Override
-    public void handle(KeyEvent event) {
-        switch (event.getCode()) {
-            case UP -> loggingArea.setText("UP key press detected");
-            case LEFT -> loggingArea.setText("LEFT key press detected");
-            case RIGHT -> loggingArea.setText("RIGHT key press detected");
-            case DOWN -> loggingArea.setText("DOWN key press detected");
-            case SPACE -> loggingArea.setText("SPACE key press detected");
-            case CONTROL -> loggingArea.setText("CTRL key press detected");
-            default -> loggingArea.setText("Invalid key pressed");
-        }
 
-    }
+
 }
