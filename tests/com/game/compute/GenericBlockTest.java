@@ -15,4 +15,15 @@ public class GenericBlockTest {
         GenericBlock myBlock = new GenericBlock(6, new int[] {0,0});
         assertEquals(6,myBlock.getType());
     }
+
+    @Test
+    public void rotateBlock() {
+        GenericBlock myBlock = new GenericBlock(6, new int[] {0,0});
+        GenericBlock compareBlock = new GenericBlock(6, new int[] {0,0});
+        for(int i = 0; i<4;i++) {
+            myBlock.rotateBlock();
+        }
+
+        assertEquals(compareBlock.getBlockMatrix(),myBlock.getBlockMatrix());
+    }
 }

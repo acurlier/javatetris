@@ -2,9 +2,7 @@ package com.game.compute;
 
 public class CurrentBlock {
 
-    public void CurrentBlock(int elementType, int rotationPattern) {
-
-        boolean blockMatrix[][];
+    public CurrentBlock(int elementType, int rotationPattern) {
 
 
     }
@@ -13,9 +11,7 @@ public class CurrentBlock {
 
     }
 
-    public void rotate() {
 
-    }
 
 
 
