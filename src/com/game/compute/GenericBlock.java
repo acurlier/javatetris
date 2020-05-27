@@ -44,12 +44,19 @@ public class GenericBlock {
     }
 
     public void rotateBlock() {
+        /*
+        rotating a square matrix is equivalent to transposing it then getting its image by
+        symetry along the vertical axis
+         */
         _transposeBlock();
         _symAxis1Block();
 
     }
 
     private void _transposeBlock() {
+        /*
+        this matrix yields the transposed of the _blockMatrix
+         */
         boolean[][] temp = new boolean[_blockMatrix[0].length][_blockMatrix.length];
         for (int i = 0; i < _blockMatrix.length; i++)
             for (int j = 0; j < _blockMatrix[0].length; j++)
@@ -59,8 +66,17 @@ public class GenericBlock {
     }
 
     public void _symAxis1Block() {
-
+        /*
+        this (not so elegant) methods get the symetric of the _blockMatrix along the vertical axis
+        it is not generalized to n*m matrices --> will work only for 3x3
+         */
+        boolean[][] temp = new boolean[_blockMatrix[0].length][_blockMatrix.length];
+        for (int i = 0; i < _blockMatrix.length; i++) {
+            temp[i][0] = _blockMatrix[i][2];
+            temp[i][1] = _blockMatrix[i][1];
+            temp[i][2] = _blockMatrix[i][0];
+        }
+        _blockMatrix = temp;
+        }
 
     }
-
-}
