@@ -13,18 +13,20 @@ public class GenericBlock {
 
     private int _blockType;
     private int[] _blockPosition;
+    private int[] _positionOnGrid;
     private boolean[][] _blockMatrix;
 
     public GenericBlock(final int blockType, final int[] blockInitPosition) {
         _blockMatrix = TYPE_BLOCK_MATRIX[blockType];
         _blockPosition = blockInitPosition;
         _blockType = blockType;
+        _positionOnGrid = blockInitPosition; // determine the position of the top left corner of the block on the grid
     }
 
     public void printShape() {
         for(boolean[] line :_blockMatrix) {
             for(boolean el:line) {
-                System.out.print(el ? "X": "O");
+                System.out.print(el ? "X": " ");
             }
             System.out.println();
         }

@@ -22,8 +22,9 @@ public class GenericBlockTest {
         GenericBlock compareBlock = new GenericBlock(6, new int[] {0,0});
         for(int i = 0; i<4;i++) {
             myBlock.rotateBlock();
+            myBlock.printShape();
+            System.out.println();
         }
-
         assertEquals(compareBlock.getBlockMatrix(),myBlock.getBlockMatrix());
     }
 }
