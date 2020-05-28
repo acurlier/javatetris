@@ -43,7 +43,7 @@ public class GenericBlock {
         myBlock.printShape();
     }
 
-    public void rotateBlock() {
+    public void rotateShape() {
         /*
         rotating a square matrix is equivalent to transposing it then getting its image by
         symetry along the vertical axis

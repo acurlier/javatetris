@@ -102,22 +102,24 @@ public class GamePanel extends Application {
                 case LEFT -> {
                     _loggingArea.setText("LEFT key press detected");
                     _gameM.moveLateralCurrentBlock("LEFT");
-                    displayGameMatrix();
                 }
                 case RIGHT -> {
                     _loggingArea.setText("RIGHT key press detected");
                     _gameM.moveLateralCurrentBlock("RIGHT");
-                    displayGameMatrix();
                 }
-                case DOWN -> _loggingArea.setText("DOWN key press detected");
+                case DOWN -> {
+                    _loggingArea.setText("DOWN key press detected");
+                    _gameM.moveFastCurrentBlock();
+                }
                 case SPACE -> _loggingArea.setText("SPACE key press detected");
                 case CONTROL -> {
                     _loggingArea.setText("CTRL key press detected");
                     _gameM.rotateCurrentBlock();
-                    displayGameMatrix();
+
                 }
                 default -> _loggingArea.setText("Invalid key pressed");
             }
+            displayGameMatrix();
         });
 
         _startButton.setOnAction(actionEvent -> {
@@ -174,7 +176,7 @@ public class GamePanel extends Application {
                 for (Node node : tileList) {
                     if ((node instanceof Rectangle) && (GridPane.getRowIndex(node) == i &&
                             GridPane.getColumnIndex(node) == j)) {
-                        if (gameMatrix[i][j]) {
+                        if (gameMatrix[i][j+2]) { // +2 to cope with the left free gap of the game matrix
                             ((Rectangle) node).setFill(Color.BLACK);
                         } else {
                             ((Rectangle) node).setFill(Color.WHITE);
