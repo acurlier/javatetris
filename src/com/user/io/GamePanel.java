@@ -1,32 +1,25 @@
 package com.user.io;
 
-import javafx.animation.Animation;
+import com.game.compute.GameManager;
 import javafx.animation.FillTransition;
 import javafx.animation.SequentialTransition;
-import javafx.animation.Transition;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.scene.control.TextArea;
 import javafx.util.Duration;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 public class GamePanel extends Application {
@@ -37,11 +30,12 @@ public class GamePanel extends Application {
     private final Label _KeyInput;
     private TextField _KeyOutputPrint;
 
-    private Button _startButton;
+    private final Button _startButton;
 
     private final int _gameScreenWidth = 18;
     private final int _gameScreenHeight = 27;
-    private final int _cellSize = 15;
+
+    private GameManager _gameM;
 
     //public static void main(String[] args) {
     // launch(args);
@@ -72,6 +66,9 @@ public class GamePanel extends Application {
 
         // add controls
         _startButton = new Button("Click me");
+
+        //game manager
+        _gameM = new GameManager(_gameScreenWidth, _gameScreenHeight, 0.5f);
     }
 
     @Override
@@ -80,6 +77,7 @@ public class GamePanel extends Application {
         ///////SETUP THE STAGE
         primaryStage.setTitle("JAVATetris");
 
+        int _cellSize = 15;
         int gameGridSizeX = _cellSize * _gameScreenWidth;
         int gameGridSizeY = _cellSize * _gameScreenHeight;
 
@@ -98,18 +96,34 @@ public class GamePanel extends Application {
 
         _loggingArea.setOnKeyPressed(keyEvent -> {
             switch (keyEvent.getCode()) {
-                case UP -> _loggingArea.setText("UP key press detected");
-                case LEFT -> _loggingArea.setText("LEFT key press detected");
-                case RIGHT -> _loggingArea.setText("RIGHT key press detected");
+                case UP -> {
+                    _loggingArea.setText("UP key press detected");
+                }
+                case LEFT -> {
+                    _loggingArea.setText("LEFT key press detected");
+                    _gameM.moveLateralCurrentBlock("LEFT");
+                    displayGameMatrix();
+                }
+                case RIGHT -> {
+                    _loggingArea.setText("RIGHT key press detected");
+                    _gameM.moveLateralCurrentBlock("RIGHT");
+                    displayGameMatrix();
+                }
                 case DOWN -> _loggingArea.setText("DOWN key press detected");
                 case SPACE -> _loggingArea.setText("SPACE key press detected");
-                case CONTROL -> _loggingArea.setText("CTRL key press detected");
+                case CONTROL -> {
+                    _loggingArea.setText("CTRL key press detected");
+                    _gameM.rotateCurrentBlock();
+                    displayGameMatrix();
+                }
                 default -> _loggingArea.setText("Invalid key pressed");
             }
         });
 
         _startButton.setOnAction(actionEvent -> {
-            animateGameGrid();
+            //animateGameGrid();
+            playGame();
+            _loggingArea.requestFocus();
         });
 
         ///////DISPLAY UI
@@ -120,7 +134,6 @@ public class GamePanel extends Application {
 
     private void generateGameGrid(int w, int h) {
 
-        Pane currentPane = new Pane();
         for (int i = 0; i < w; i++) {
             for (int j = 0; j < h; j++) {
 
@@ -133,6 +146,44 @@ public class GamePanel extends Application {
 
             }
         }
+    }
+
+    private void playGame() {
+        System.out.println("playGame started");
+        boolean lose = false;
+        _gameM.instantiateCurrentBlock();
+        displayGameMatrix();
+
+//        while (!lose){
+//
+//            boolean[][] gameMatrix = _gameM.updateGameMatrix();
+//            displayGameMatrix(gameMatrix);
+//            lose = _gameM.getGameStatus();
+//        }
+
+    }
+
+    private void displayGameMatrix() {
+
+        boolean[][] gameMatrix = _gameM.getGameMatrices();
+
+        ObservableList<Node> tileList = _gameGrid.getChildren();
+        for (int i = 0; i < _gameScreenHeight; i++) {
+            for (int j = 0; j < _gameScreenWidth; j++) {
+
+                for (Node node : tileList) {
+                    if ((node instanceof Rectangle) && (GridPane.getRowIndex(node) == i &&
+                            GridPane.getColumnIndex(node) == j)) {
+                        if (gameMatrix[i][j]) {
+                            ((Rectangle) node).setFill(Color.BLACK);
+                        } else {
+                            ((Rectangle) node).setFill(Color.WHITE);
+                        }
+                    }
+                }
+            }
+        }
+        System.out.println("matrix display updated");
     }
 
     private void animateGameGrid() {
@@ -149,7 +200,7 @@ public class GamePanel extends Application {
 
     private SequentialTransition generateAnimationList(Color color1, Color color2) {
         SequentialTransition sequenceBlink = new SequentialTransition();
-        sequenceBlink.setDelay(Duration.millis(0.05));
+        sequenceBlink.setDelay(Duration.millis(0.05f));
         ObservableList<Node> tileList = _gameGrid.getChildren();
         for (int i = 0; i < _gameScreenHeight; i++) {
             for (int j = 0; j < _gameScreenWidth; j++) {

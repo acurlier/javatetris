@@ -11,14 +11,12 @@ public class GenericBlock {
             {{false, false, false}, {true, false, false}, {true, true, true}}       // element 6
     };
 
-    private int _blockType;
-    private int[] _blockPosition;
-    private int[] _positionOnGrid;
-    private boolean[][] _blockMatrix;
+    protected int _blockType;
+    protected int[] _positionOnGrid;
+    protected boolean[][] _blockMatrix;
 
     public GenericBlock(final int blockType, final int[] blockInitPosition) {
         _blockMatrix = TYPE_BLOCK_MATRIX[blockType];
-        _blockPosition = blockInitPosition;
         _blockType = blockType;
         _positionOnGrid = blockInitPosition; // determine the position of the top left corner of the block on the grid
     }
