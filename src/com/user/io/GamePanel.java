@@ -109,7 +109,7 @@ public class GamePanel extends Application {
                 }
                 case DOWN -> {
                     _loggingArea.setText("DOWN key press detected");
-                    _gameM.moveFastCurrentBlock();
+                    _gameM.moveDownCurrentBlock();
                 }
                 case SPACE -> _loggingArea.setText("SPACE key press detected");
                 case CONTROL -> {
@@ -176,7 +176,7 @@ public class GamePanel extends Application {
                 for (Node node : tileList) {
                     if ((node instanceof Rectangle) && (GridPane.getRowIndex(node) == i &&
                             GridPane.getColumnIndex(node) == j)) {
-                        if (gameMatrix[i][j+2]) { // +2 to cope with the left free gap of the game matrix
+                        if (gameMatrix[i][j]) { // +2 to cope with the left free gap of the game matrix
                             ((Rectangle) node).setFill(Color.BLACK);
                         } else {
                             ((Rectangle) node).setFill(Color.WHITE);

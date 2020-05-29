@@ -22,9 +22,9 @@ public class GenericBlock {
     }
 
     public void printShape() {
-        for(boolean[] line :_blockMatrix) {
-            for(boolean el:line) {
-                System.out.print(el ? "X": " ");
+        for (boolean[] line : _blockMatrix) {
+            for (boolean el : line) {
+                System.out.print(el ? "X" : " ");
             }
             System.out.println();
         }
@@ -39,7 +39,7 @@ public class GenericBlock {
     }
 
     public static void main(String[] args) {
-        GenericBlock myBlock = new GenericBlock(6, new int[] {0,0});
+        GenericBlock myBlock = new GenericBlock(6, new int[]{0, 0});
         myBlock.printShape();
     }
 
@@ -77,6 +77,6 @@ public class GenericBlock {
             temp[i][2] = _blockMatrix[i][0];
         }
         _blockMatrix = temp;
-        }
-
     }
+
+}

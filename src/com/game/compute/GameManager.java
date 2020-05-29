@@ -1,5 +1,9 @@
 package com.game.compute;
 
+import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 public class GameManager {
     /*
     This class defines the game manager, responsible to manage the game
@@ -9,8 +13,10 @@ public class GameManager {
     private static final int CLIPPING_WIDTH = 2;
 
     private boolean[][] _gameMatrix;
-    private boolean[][] _tentativeCurrentBlockMatrix;
+    private boolean[][] _currentBlockMatrix;
+    private boolean[][] _staticBlocksMatrix;
     private CurrentBlock _currentBlock;
+    private StaticBlocks _staticBlocks;
     private final int _gameHeight;
     private final int _gameWidth;
 
@@ -20,22 +26,20 @@ public class GameManager {
         _gameWidth = gameWidth;
         _gameHeight = gameHeight;
         _gameMatrix = new boolean[gameHeight][gameWidth];
-        _tentativeCurrentBlockMatrix = new boolean[_gameHeight][_gameWidth + 2*CLIPPING_WIDTH];
+        _currentBlockMatrix = new boolean[_gameHeight + CLIPPING_WIDTH][_gameWidth + 2 * CLIPPING_WIDTH];
+        _staticBlocksMatrix = new boolean[_gameHeight][_gameWidth];
 
-        for (int i = 0; i < gameHeight; i++) {
-            for (int j = 0; j < gameWidth; j++) {
-                _gameMatrix[i][j] = false;
-            }
+        _staticBlocks = new StaticBlocks(_gameWidth, _gameHeight);
+
+        for (boolean[] row : _gameMatrix) {
+            Arrays.fill(row, false);
         }
-
-        for (int i = 0; i < gameHeight; i++) {
-            for (int j = 0; j < gameWidth + 2*CLIPPING_WIDTH; j++) {
-                _tentativeCurrentBlockMatrix[i][j] = false;
-            }
+        for (boolean[] row : _currentBlockMatrix) {
+            Arrays.fill(row, false);
         }
-
-        System.out.println("GameManager instantiated");
-
+        for (boolean[] row : _staticBlocksMatrix) {
+            Arrays.fill(row, false);
+        }
     }
 
     private void goToNextTick() {
@@ -43,24 +47,102 @@ public class GameManager {
     }
 
     public void instantiateCurrentBlock() {
-        _currentBlock = new CurrentBlock(2, 0, _gameWidth, _gameHeight);
-        _tentativeCurrentBlockMatrix = _currentBlock.getGlobalBlockMatrix();
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 6 + 1);
+        _currentBlock = new CurrentBlock(randomNum, 0, _gameWidth, _gameHeight);
+        _currentBlockMatrix = _currentBlock.getGlobalBlockMatrix();
 
     }
 
-    private void verifyCurrentBlockMatrix() {
+    private void updateGameMatrices() {
+        //_gameMatrix = _currentBlock.getGlobalBlockMatrix();
+    }
+
+    public boolean[][] getGameMatrices() {
+        for(int i=0; i< _gameHeight; i++) {
+            for(int j=0; j< _gameWidth; j++) {
+                _gameMatrix[i][j] = _staticBlocksMatrix[i][j] || _currentBlockMatrix[i][j+2];
+            }
+        }
+        return _gameMatrix;
+    }
+
+    public void rotateCurrentBlock() {
+        _currentBlockMatrix = _currentBlock.rotate();
+        preventWallCollision();
+        preventGroundCollision();
+    }
+
+    public void moveLateralCurrentBlock(String input) {
+        if (input.equals("LEFT")) {
+            _currentBlockMatrix = _currentBlock.moveLeft();
+            preventWallCollision();
+        } else if (input.equals("RIGHT")) {
+            _currentBlockMatrix = _currentBlock.moveRight();
+            preventWallCollision();
+        }
+    }
+
+    public void moveDownCurrentBlock() {
+        boolean isDockable = false;
+        _currentBlockMatrix = _currentBlock.moveDown();
+        isDockable = preventGroundCollision();
+        if (isDockable) {
+            System.out.println("dock block");
+            dockBlock();
+        }
+    }
+
+    private void dockBlock() {
+        _staticBlocks.addBlockToMatrix(_currentBlock);
+        _staticBlocksMatrix = _staticBlocks.getStaticBlocksMatrix();
+        instantiateCurrentBlock();
+
+    }
+
+    private void preventLateralBlockCollision() {
+        /*
+        avoid clipping with static (frozen) blocks during translation or rotation
+         */
         int[] position = _currentBlock.getBlockPosition();
-        if (position[1] < 2 || position[1] > (_gameWidth + 2*CLIPPING_WIDTH - 5)) { // verification is required
+    }
+
+    private boolean preventGroundCollision() {
+        /*
+        avoid clipping with the ground during rotation
+         */
+        boolean collisionAvoided = false;
+        int[] position = _currentBlock.getBlockPosition();
+        if (position[0] >= _gameHeight - 2) {
+            for (int i = position[1]; i < position[1] + 3; i++) { // sweep through the current block matrix
+                if (_currentBlockMatrix[_gameHeight + CLIPPING_WIDTH - 2][i] ||
+                        _currentBlockMatrix[_gameHeight + CLIPPING_WIDTH - 1][i]) {
+                    _currentBlock.moveUp();
+                    collisionAvoided = true;
+
+                }
+            }
+        }
+        System.out.println("collision :" + collisionAvoided);
+        return collisionAvoided;
+    }
+
+    private void preventWallCollision() {
+        /*
+        avoid clipping with the walls during translation or rotation
+         */
+
+        int[] position = _currentBlock.getBlockPosition();
+        if (position[1] < 2 || position[1] >= (_gameWidth + 2 * CLIPPING_WIDTH - 4)) { // verification is required
             // if there is any cell in one of the free gaps, the block is pushed in the opposite direction
             // this allows to manage nicely the rotations close to the game side border
             for (int i = position[0]; i < position[0] + 3; i++) {
 
-                if (_tentativeCurrentBlockMatrix[i][0] || _tentativeCurrentBlockMatrix[i][1]) {
+                if (_currentBlockMatrix[i][0] || _currentBlockMatrix[i][1]) {
                     _currentBlock.moveRight();
                     break;
 
-                } else if (_tentativeCurrentBlockMatrix[i][_gameWidth + 2*CLIPPING_WIDTH - 1] ||
-                        _tentativeCurrentBlockMatrix[i][_gameWidth + 2*CLIPPING_WIDTH - 2]) {
+                } else if (_currentBlockMatrix[i][_gameWidth + 2 * CLIPPING_WIDTH - 1] ||
+                        _currentBlockMatrix[i][_gameWidth + 2 * CLIPPING_WIDTH - 2]) {
                     _currentBlock.moveLeft();
                     break;
                 }
@@ -68,35 +150,6 @@ public class GameManager {
 
         }
 
-    }
-
-    private void updateGameMatrices() {
-
-        System.out.println("Game matrix updated");
-        //_gameMatrix = _currentBlock.getGlobalBlockMatrix();
-    }
-
-    public boolean[][] getGameMatrices() {
-        return _tentativeCurrentBlockMatrix;
-    }
-
-    public void rotateCurrentBlock() {
-        _tentativeCurrentBlockMatrix = _currentBlock.rotate();
-        verifyCurrentBlockMatrix();
-    }
-
-    public void moveLateralCurrentBlock(String input) {
-        if (input.equals("LEFT")) {
-            _tentativeCurrentBlockMatrix = _currentBlock.moveLeft();
-            verifyCurrentBlockMatrix();
-        } else if (input.equals("RIGHT")) {
-            _tentativeCurrentBlockMatrix = _currentBlock.moveRight();
-            verifyCurrentBlockMatrix();
-        }
-    }
-
-    public void moveFastCurrentBlock() {
-        _tentativeCurrentBlockMatrix = _currentBlock.moveDown();
     }
 
     private void upDateScore() {
