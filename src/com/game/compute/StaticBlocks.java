@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 public class StaticBlocks {
 
+    private static final int CLIPPING_WIDTH = 3;
+
     public boolean[][] _staticBlocksMatrix;
     int _gameHeight;
     int _gameWidth;
@@ -11,7 +13,7 @@ public class StaticBlocks {
     public StaticBlocks(int gameWidth, int gameHeight) {
         _gameHeight = gameHeight;
         _gameWidth = gameWidth;
-        _staticBlocksMatrix = new boolean[_gameHeight][_gameWidth];
+        _staticBlocksMatrix = new boolean[_gameHeight + CLIPPING_WIDTH][_gameWidth + 2 * CLIPPING_WIDTH];
         for (boolean[] row : _staticBlocksMatrix) {
             Arrays.fill(row, false);
         }
@@ -25,10 +27,11 @@ public class StaticBlocks {
 
         for (int i = 0; i < _staticBlocksMatrix.length; i++) {
             for (int j = 0; j < _staticBlocksMatrix[0].length; j++) {
-                _staticBlocksMatrix[i][j] = _staticBlocksMatrix[i][j] || compareMatrix[i][j + 2];
+                _staticBlocksMatrix[i][j] = _staticBlocksMatrix[i][j] || compareMatrix[i][j];
             }
         }
     }
+
     public boolean[][] getStaticBlocksMatrix() {
         return _staticBlocksMatrix;
     }

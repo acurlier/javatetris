@@ -90,7 +90,7 @@ public class GamePanel extends Application {
         _root.add(_startButton, 0, 3);
 
         Scene scene = new Scene(_root, 350, 550); // width & height
-        _loggingArea.requestFocus();
+        _startButton.requestFocus();
 
         ///////CONFIGURE UI EVENT HANDLING
 
@@ -162,7 +162,6 @@ public class GamePanel extends Application {
 //            displayGameMatrix(gameMatrix);
 //            lose = _gameM.getGameStatus();
 //        }
-
     }
 
     private void displayGameMatrix() {

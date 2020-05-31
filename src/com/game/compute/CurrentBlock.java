@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class CurrentBlock extends GenericBlock {
 
-    private static final int CLIPPING_WIDTH = 2;
+    private static final int CLIPPING_WIDTH = 3;
 
     public boolean[][] _globalBlockMatrix;
 
@@ -34,37 +34,36 @@ public class CurrentBlock extends GenericBlock {
         for (boolean[] row : _globalBlockMatrix) {
             Arrays.fill(row, false);
         }
-        System.out.println("Current block global matrix reset");
     }
 
     public boolean[][] rotate() {
         rotateShape();
-        updateGlobalBlockMatrix();
+        updateGlobalBlockMatrix(true);
         return _globalBlockMatrix;
     }
 
     // useful only to avoid clipping with the ground during rotation at the bottom of the screen
     public boolean[][] moveUp() {
         _positionOnGrid[0] = _positionOnGrid[0] - 1;
-        updateGlobalBlockMatrix();
+        updateGlobalBlockMatrix(false);
         return _globalBlockMatrix;
     }
 
     public boolean[][] moveDown() {
         _positionOnGrid[0] = _positionOnGrid[0] + 1;
-        updateGlobalBlockMatrix();
+        updateGlobalBlockMatrix(false);
         return _globalBlockMatrix;
     }
 
     public boolean[][] moveLeft() {
         _positionOnGrid[1] = _positionOnGrid[1] - 1;
-        updateGlobalBlockMatrix();
+        updateGlobalBlockMatrix(false);
         return _globalBlockMatrix;
     }
 
     public boolean[][] moveRight() {
         _positionOnGrid[1] = _positionOnGrid[1] + 1;
-        updateGlobalBlockMatrix();
+        updateGlobalBlockMatrix(false);
         return _globalBlockMatrix;
     }
 
@@ -73,25 +72,57 @@ public class CurrentBlock extends GenericBlock {
     }
 
     public boolean[][] getGlobalBlockMatrix() {
-        updateGlobalBlockMatrix();
+        updateGlobalBlockMatrix(false);
         return _globalBlockMatrix;
     }
 
-    private void updateGlobalBlockMatrix() {
+    private void updateGlobalBlockMatrix(boolean rotate) {
     /*
-    generate a game sized matrix with a proposal for the current block matrix
-    this proposal (tentative) can be either accepted or rejected by the game manager
+    generate a game sized matrix for the current block.
+    For a rotation: translate the block in order to have a rotation along the center of gravity (and not along
+    the (0,0) cell)
      */
         _resetGlobalBlockMatrix();
+        int startRowIndex;
+        int startColumnsIndex;
 
-        int startRowIndex = _positionOnGrid[0];
-        int startColumnsIndex = _positionOnGrid[1];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+        if (rotate) {
+            int[] shift = computeCentGravityShift();
+            _positionOnGrid[0] = _positionOnGrid[0] + shift[0];
+            _positionOnGrid[1] = _positionOnGrid[1] + shift[1];
+        }
+        startRowIndex = _positionOnGrid[0];
+        startColumnsIndex = _positionOnGrid[1];
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
                 _globalBlockMatrix[i + startRowIndex][j + startColumnsIndex] = _blockMatrix[i][j];
             }
         }
-
     }
 
+    private int[] computeCentGravityShift() {
+        boolean[][] tempMatrix = _gravityCenterMatrix;
+        _gravityCenterMatrix = rotateShape(tempMatrix);
+        int[] indexBeforeRotation = findIndexofCGInMatrix(tempMatrix);
+        int[] indexAfterRotation = findIndexofCGInMatrix(_gravityCenterMatrix);
+
+        int[] translationCG = new int[indexBeforeRotation.length];
+        Arrays.setAll(translationCG, i -> indexBeforeRotation[i] - indexAfterRotation[i]);
+
+        return translationCG;
+    }
+
+    private int[] findIndexofCGInMatrix(boolean[][] matrix) {
+
+        int[] cgLocation = new int[2];
+        for (int i = 0; i < matrix.length; i++)
+            for (int j = 0; j < matrix[0].length; j++) {
+                if (matrix[i][j]) {
+                    cgLocation = new int[]{i, j};
+                    break;
+                }
+            }
+        return cgLocation;
+    }
 }
