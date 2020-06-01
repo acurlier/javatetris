@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class CurrentBlock extends GenericBlock {
 
-    private static final int CLIPPING_WIDTH = 3;
+    private static final int CLIPPING_WIDTH = 4;
 
     public boolean[][] _globalBlockMatrix;
 

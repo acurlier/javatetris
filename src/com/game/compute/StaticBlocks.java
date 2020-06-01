@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class StaticBlocks {
 
-    private static final int CLIPPING_WIDTH = 3;
+    private static final int CLIPPING_WIDTH = 4;
 
     public boolean[][] _staticBlocksMatrix;
     int _gameHeight;

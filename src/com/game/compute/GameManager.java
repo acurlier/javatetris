@@ -9,7 +9,7 @@ public class GameManager {
     clock, to instantiate new blocks, to keep track of the pixel boundary
     of the static blocks and to detect the collisions
      */
-    private static final int CLIPPING_WIDTH = 3;
+    private static final int CLIPPING_WIDTH = 4;
 
     private boolean[][] _gameMatrix;
     private boolean[][] _currentBlockMatrix;
@@ -48,14 +48,15 @@ public class GameManager {
     }
 
     public synchronized void instantiateCurrentBlock() {
-        int randomNum = ThreadLocalRandom.current().nextInt(0, 6 + 1);
+        int randomNum; //= ThreadLocalRandom.current().nextInt(0, 6 + 1);
+        randomNum = 0;
         _currentBlock = new CurrentBlock(randomNum, 0, _gameWidth, _gameHeight);
         _currentBlockMatrix = _currentBlock.getGlobalBlockMatrix();
         detectGameOver();
 
     }
 
-    public boolean[][] getGameMatrices() {
+    public synchronized boolean[][] getGameMatrices() {
         for (int i = 0; i < _gameHeight; i++) {
             for (int j = 0; j < _gameWidth; j++) {
                 _gameMatrix[i][j] = _staticBlocksMatrix[i][j + CLIPPING_WIDTH] ||
@@ -117,7 +118,6 @@ public class GameManager {
                 }
             }
         }
-        System.out.println("collision :" + collisionWithBlockAvoided);
         return collisionWithBlockAvoided;
     }
 
@@ -128,9 +128,10 @@ public class GameManager {
         boolean collisionWithGroundAvoided = false;
         int[] position = _currentBlock.getBlockPosition();
 
-        if (position[0] <= _gameHeight + CLIPPING_WIDTH - 3) {
+        if (position[0] <= _gameHeight + CLIPPING_WIDTH - 4) {
             for (int i = position[1]; i < position[1] + 4; i++) { // sweep through the current block matrix
-                if (_currentBlockMatrix[_gameHeight + CLIPPING_WIDTH - 3][i] ||
+                if (_currentBlockMatrix[_gameHeight + CLIPPING_WIDTH - 4][i] ||
+                        _currentBlockMatrix[_gameHeight + CLIPPING_WIDTH - 3][i] ||
                         _currentBlockMatrix[_gameHeight + CLIPPING_WIDTH - 2][i] ||
                         _currentBlockMatrix[_gameHeight + CLIPPING_WIDTH - 1][i]) {
                     _currentBlock.moveUp();
@@ -148,18 +149,20 @@ public class GameManager {
          */
 
         int[] position = _currentBlock.getBlockPosition();
-        if (position[1] <= CLIPPING_WIDTH || position[1] >= (_gameWidth + 2 * CLIPPING_WIDTH - 6)) { // verification is required
+        if (position[1] <= CLIPPING_WIDTH || position[1] >= (_gameWidth + 2 * CLIPPING_WIDTH - 8)) { // verification is required
             // if there is any cell in one of the free gaps, the block is pushed in the opposite direction
             // this allows to manage nicely the rotations close to the game side border
             for (int i = position[0]; i < position[0] + 4; i++) {
 
-                if (_currentBlockMatrix[i][0] || _currentBlockMatrix[i][1] || _currentBlockMatrix[i][2]) {
+                if (_currentBlockMatrix[i][0] || _currentBlockMatrix[i][1] || _currentBlockMatrix[i][2]
+                        || _currentBlockMatrix[i][3]) {
                     _currentBlock.moveRight();
                     break;
 
                 } else if (_currentBlockMatrix[i][_gameWidth + 2 * CLIPPING_WIDTH - 1] ||
                         _currentBlockMatrix[i][_gameWidth + 2 * CLIPPING_WIDTH - 2] ||
-                        _currentBlockMatrix[i][_gameWidth + 2 * CLIPPING_WIDTH - 3]) {
+                        _currentBlockMatrix[i][_gameWidth + 2 * CLIPPING_WIDTH - 3] ||
+                        _currentBlockMatrix[i][_gameWidth + 2 * CLIPPING_WIDTH - 4]) {
                     _currentBlock.moveLeft();
                     break;
                 }
@@ -213,7 +216,7 @@ public class GameManager {
 
     }
 
-    public synchronized boolean detectGameOver() {
+    private synchronized void detectGameOver() {
     /*
     upon the creation of a new block, if it interferes with the static blocks matrix (coincidence in the global current
     and static blocks matrices, then the game is over!
@@ -227,9 +230,9 @@ public class GameManager {
                 }
             }
         }
-        return _lose;
     }
 
+    public synchronized boolean getGameOver() {return _lose;}
 
     private void exitGame() {
 

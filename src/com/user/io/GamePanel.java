@@ -235,7 +235,7 @@ public class GamePanel extends Application implements Runnable {
             if (i%35 == 0) _gameM.moveDownCurrentBlock();
 
             displayGameMatrix();
-            lose = _gameM.detectGameOver();
+            lose = _gameM.getGameOver();
             try {
                 Thread.sleep(5);
                 i++;
