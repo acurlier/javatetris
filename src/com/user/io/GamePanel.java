@@ -22,7 +22,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 
-public class GamePanel extends Application {
+public class GamePanel extends Application implements Runnable {
 
     private final TextArea _loggingArea;
     private final GridPane _root;
@@ -41,7 +41,7 @@ public class GamePanel extends Application {
     // launch(args);
     // }
 
-    public GamePanel() {
+    public GamePanel()  {
 
         _root = new GridPane();
         _gameGrid = new GridPane();
@@ -95,7 +95,7 @@ public class GamePanel extends Application {
         ///////CONFIGURE UI EVENT HANDLING
 
         _loggingArea.setOnKeyPressed(keyEvent -> {
-            switch (keyEvent.getCode()) {
+            switch (keyEvent.getCode()) { // TODO expose keyEvent to gamemanager
                 case UP -> {
                     _loggingArea.setText("UP key press detected");
                 }
@@ -119,12 +119,15 @@ public class GamePanel extends Application {
                 }
                 default -> _loggingArea.setText("Invalid key pressed");
             }
-            displayGameMatrix();
         });
 
-        _startButton.setOnAction(actionEvent -> {
+        _startButton.setOnAction(actionEvent -> { // TODO move to gamemanager
             //animateGameGrid();
-            playGame();
+            try {
+                playGame();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             _loggingArea.requestFocus();
         });
 
@@ -150,19 +153,12 @@ public class GamePanel extends Application {
         }
     }
 
-    private void playGame() {
-        System.out.println("playGame started");
+    private void playGame() throws InterruptedException {
         boolean lose = false;
         _gameM.instantiateCurrentBlock();
-        displayGameMatrix();
+        new Thread(this).start();
 
-//        while (!lose){
-//
-//            boolean[][] gameMatrix = _gameM.updateGameMatrix();
-//            displayGameMatrix(gameMatrix);
-//            lose = _gameM.getGameStatus();
-//        }
-    }
+        }
 
     private void displayGameMatrix() {
 
@@ -184,7 +180,6 @@ public class GamePanel extends Application {
                 }
             }
         }
-        System.out.println("matrix display updated");
     }
 
     private void animateGameGrid() {
@@ -219,5 +214,34 @@ public class GamePanel extends Application {
             }
         }
         return sequenceBlink;
+    }
+
+    /**
+     * When an object implementing interface {@code Runnable} is used
+     * to create a thread, starting the thread causes the object's
+     * {@code run} method to be called in that separately executing
+     * thread.
+     * <p>
+     * The general contract of the method {@code run} is that it may
+     * take any action whatsoever.
+     *
+     * @see Thread#run()
+     */
+    @Override
+    public void run() {
+        boolean lose = false;
+        int i = 0;
+        while (!lose) {
+            if (i%35 == 0) _gameM.moveDownCurrentBlock();
+
+            displayGameMatrix();
+            lose = _gameM.detectGameOver();
+            try {
+                Thread.sleep(5);
+                i++;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

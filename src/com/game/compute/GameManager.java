@@ -47,16 +47,12 @@ public class GameManager {
 
     }
 
-    public void instantiateCurrentBlock() {
+    public synchronized void instantiateCurrentBlock() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 6 + 1);
         _currentBlock = new CurrentBlock(randomNum, 0, _gameWidth, _gameHeight);
         _currentBlockMatrix = _currentBlock.getGlobalBlockMatrix();
         detectGameOver();
 
-    }
-
-    private void updateGameMatrices() {
-        //_gameMatrix = _currentBlock.getGlobalBlockMatrix();
     }
 
     public boolean[][] getGameMatrices() {
@@ -69,7 +65,7 @@ public class GameManager {
         return _gameMatrix;
     }
 
-    public void rotateCurrentBlock() {
+    public synchronized void rotateCurrentBlock() {
         if (_currentBlock.getType() != 4) { // if not a "O" square element
             _currentBlockMatrix = _currentBlock.rotate();
             preventWallClipping();
@@ -79,7 +75,7 @@ public class GameManager {
         }
     }
 
-    public void moveLateralCurrentBlock(String input) {
+    public synchronized void moveLateralCurrentBlock(String input) {
         if (input.equals("LEFT")) {
             _currentBlockMatrix = _currentBlock.moveLeft();
         } else if (input.equals("RIGHT")) {
@@ -89,7 +85,7 @@ public class GameManager {
         preventLateralBlockClipping(input);
     }
 
-    public void moveDownCurrentBlock() {
+    public synchronized void moveDownCurrentBlock() {
         boolean isDockable;
         _currentBlockMatrix = _currentBlock.moveDown();
         boolean isDockable_pt1 = preventGroundClipping();
@@ -100,11 +96,10 @@ public class GameManager {
         }
     }
 
-    private void dockBlock() {
+    private synchronized void dockBlock() {
         _staticBlocks.addBlockToMatrix(_currentBlock);
         _staticBlocksMatrix = _staticBlocks.getStaticBlocksMatrix();
         instantiateCurrentBlock();
-
     }
 
     private boolean preventDownwardBlockClipping() {
@@ -218,7 +213,7 @@ public class GameManager {
 
     }
 
-    private void detectGameOver() {
+    public synchronized boolean detectGameOver() {
     /*
     upon the creation of a new block, if it interferes with the static blocks matrix (coincidence in the global current
     and static blocks matrices, then the game is over!
@@ -232,9 +227,6 @@ public class GameManager {
                 }
             }
         }
-    }
-
-    public boolean getLose() {
         return _lose;
     }
 

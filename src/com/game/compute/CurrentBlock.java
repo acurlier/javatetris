@@ -76,7 +76,7 @@ public class CurrentBlock extends GenericBlock {
         return _globalBlockMatrix;
     }
 
-    private void updateGlobalBlockMatrix(boolean rotate) {
+    private synchronized void updateGlobalBlockMatrix(boolean rotate) {
     /*
     generate a game sized matrix for the current block.
     For a rotation: translate the block in order to have a rotation along the center of gravity (and not along
