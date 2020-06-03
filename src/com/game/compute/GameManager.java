@@ -1,6 +1,8 @@
 package com.game.compute;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GameManager {
@@ -48,8 +50,7 @@ public class GameManager {
     }
 
     public synchronized void instantiateCurrentBlock() {
-        int randomNum; //= ThreadLocalRandom.current().nextInt(0, 6 + 1);
-        randomNum = 0;
+        int randomNum = ThreadLocalRandom.current().nextInt(0, 6 + 1);
         _currentBlock = new CurrentBlock(randomNum, 0, _gameWidth, _gameHeight);
         _currentBlockMatrix = _currentBlock.getGlobalBlockMatrix();
         detectGameOver();
@@ -100,6 +101,7 @@ public class GameManager {
     private synchronized void dockBlock() {
         _staticBlocks.addBlockToMatrix(_currentBlock);
         _staticBlocksMatrix = _staticBlocks.getStaticBlocksMatrix();
+        checkLineClear();
         instantiateCurrentBlock();
     }
 
@@ -210,10 +212,22 @@ public class GameManager {
     4 lines : 1200
      */
 
+
     }
 
-    private void applyGamePolicy() {// detectContact() {
+    private void checkLineClear() {// detectContact() {
+        List<Integer> lineIndex = new ArrayList<Integer>();
+        int i = 0;
+        for (boolean[] line : _staticBlocksMatrix) {
+            if(!Arrays.asList(line).contains(false)) {
+                lineIndex;
 
+            }
+            i++;
+
+        }
+        //        for j=
+//        _staticBlocksMatrix[CLIPPING_WIDTH][j]
     }
 
     private synchronized void detectGameOver() {
@@ -232,7 +246,7 @@ public class GameManager {
         }
     }
 
-    public synchronized boolean getGameOver() {return _lose;}
+    public boolean getGameOver() {return _lose;}
 
     private void exitGame() {
 

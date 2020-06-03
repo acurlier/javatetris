@@ -232,16 +232,17 @@ public class GamePanel extends Application implements Runnable {
         boolean lose = false;
         int i = 0;
         while (!lose) {
-            if (i%35 == 0) _gameM.moveDownCurrentBlock();
+            if (i%15 == 0) _gameM.moveDownCurrentBlock();
 
             displayGameMatrix();
             lose = _gameM.getGameOver();
             try {
-                Thread.sleep(5);
+                Thread.sleep(1);
                 i++;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        _loggingArea.setText("Game Over !");
     }
 }
