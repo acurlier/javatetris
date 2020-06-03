@@ -32,6 +32,26 @@ public class StaticBlocks {
         }
     }
 
+    public void removeLineInStaticBlocksMatrix(int[] toRemove) {
+        /* this procedure start from the top of the grid, and remove the completed row by shifting
+            down the row above
+         */
+        for (int index : toRemove) {
+            if (index != -1) {
+                boolean[][] tempMatrix;
+                tempMatrix = _staticBlocksMatrix.clone();
+
+                for (int i = 1; i <= index; i++) {
+                    tempMatrix[i] = _staticBlocksMatrix[i - 1];
+                }
+                boolean[] newLine = new boolean[_gameWidth + 2 * CLIPPING_WIDTH];
+                Arrays.fill(newLine, false);
+                tempMatrix[0] = newLine;
+                _staticBlocksMatrix = tempMatrix;
+            }
+        }
+}
+
     public boolean[][] getStaticBlocksMatrix() {
         return _staticBlocksMatrix;
     }

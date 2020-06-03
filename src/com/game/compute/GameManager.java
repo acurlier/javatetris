@@ -1,8 +1,6 @@
 package com.game.compute;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GameManager {
@@ -22,17 +20,20 @@ public class GameManager {
     private final int _gameWidth;
 
     public boolean _lose;
+    public int _score;
 
 
     public GameManager(int gameWidth, int gameHeight, float gamePace) {
 
         _gameWidth = gameWidth;
         _gameHeight = gameHeight;
+
         _gameMatrix = new boolean[_gameHeight][_gameWidth];
         _currentBlockMatrix = new boolean[_gameHeight + CLIPPING_WIDTH][_gameWidth + 2 * CLIPPING_WIDTH];
         _staticBlocksMatrix = new boolean[_gameHeight + CLIPPING_WIDTH][_gameWidth + 2 * CLIPPING_WIDTH];
 
         _staticBlocks = new StaticBlocks(_gameWidth, _gameHeight);
+        _score = 0;
 
         for (boolean[] row : _gameMatrix) {
             Arrays.fill(row, false);
@@ -45,13 +46,9 @@ public class GameManager {
         }
     }
 
-    private void goToNextTick() {
-
-    }
-
     public synchronized void instantiateCurrentBlock() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 6 + 1);
-        _currentBlock = new CurrentBlock(randomNum, 0, _gameWidth, _gameHeight);
+        _currentBlock = new CurrentBlock(0, 0, _gameWidth, _gameHeight);
         _currentBlockMatrix = _currentBlock.getGlobalBlockMatrix();
         detectGameOver();
 
@@ -203,7 +200,7 @@ public class GameManager {
         }
     }
 
-    private void upDateScore() {
+    private void upDateScore(int numberLine) {
     /*
     this method updates the score when at least one line are removed due to completeness
     1 line : 40
@@ -211,24 +208,42 @@ public class GameManager {
     3 lines : 300
     4 lines : 1200
      */
-
-
+        switch (numberLine) {
+            case 1 -> _score += 40;
+            case 2 -> _score += 100;
+            case 3 -> _score += 300;
+            case 4 -> _score += 1200;
+            default -> _score += 0;
+        }
+        System.out.println("New score : " + _score);
     }
 
     private void checkLineClear() {// detectContact() {
-        List<Integer> lineIndex = new ArrayList<Integer>();
-        int i = 0;
-        for (boolean[] line : _staticBlocksMatrix) {
-            if(!Arrays.asList(line).contains(false)) {
-                lineIndex;
+        int[] lineIndex = {-1, -1, -1, -1}; // only 4 rows can be completed at the same time
 
+        int i = 0;
+        int j = 0;
+
+        for (boolean[] line : _staticBlocksMatrix) {
+
+            boolean completeLine = true;
+            for (int k = CLIPPING_WIDTH; k< line.length-CLIPPING_WIDTH; k++) {
+                if (!line[k]) {
+                    completeLine = false;
+                }
+            }
+            if (completeLine) {
+                lineIndex[j] = i;
+                j++;
             }
             i++;
-
         }
-        //        for j=
-//        _staticBlocksMatrix[CLIPPING_WIDTH][j]
+
+        _staticBlocks.removeLineInStaticBlocksMatrix(lineIndex);
+        _staticBlocksMatrix = _staticBlocks.getStaticBlocksMatrix();
+        upDateScore(j);
     }
+
 
     private synchronized void detectGameOver() {
     /*
@@ -246,7 +261,9 @@ public class GameManager {
         }
     }
 
-    public boolean getGameOver() {return _lose;}
+    public boolean getGameOver() {
+        return _lose;
+    }
 
     private void exitGame() {
 
