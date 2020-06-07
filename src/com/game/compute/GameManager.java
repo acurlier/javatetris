@@ -1,9 +1,15 @@
 package com.game.compute;
 
+
+import javafx.application.Application;
+import javafx.scene.input.KeyCode;
+
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class GameManager {
+import com.user.io.GamePanel;
+
+public class GameManager implements Runnable {
     /*
     This class defines the game manager, responsible to manage the game
     clock, to instantiate new blocks, to keep track of the pixel boundary
@@ -19,11 +25,19 @@ public class GameManager {
     private final int _gameHeight;
     private final int _gameWidth;
 
-    public boolean _lose;
-    public int _score;
+    private GamePanel _gamePanel;
 
+    private boolean _lose;
+    private int _score;
 
-    public GameManager(int gameWidth, int gameHeight, float gamePace) {
+    public static void main(String[] args) throws InterruptedException {
+        int _gameScreenWidth = 18; //10
+        int _gameScreenHeight = 27; //40
+        new GameManager(_gameScreenWidth, _gameScreenHeight, 0.5f);
+
+    }
+
+    private GameManager(int gameWidth, int gameHeight, float gamePace)  {
 
         _gameWidth = gameWidth;
         _gameHeight = gameHeight;
@@ -35,6 +49,17 @@ public class GameManager {
         _staticBlocks = new StaticBlocks(_gameWidth, _gameHeight);
         _score = 0;
 
+        _gamePanel = new GamePanel();
+        _gamePanel.startButton.setOnAction(actionEvent -> {
+
+            _gamePanel.loggingArea.setText("hello");
+            //animateGameGrid();
+            playGame();
+            _gamePanel.loggingArea.requestFocus();
+        });
+
+        _gamePanel.launch(GamePanel.class);
+
         for (boolean[] row : _gameMatrix) {
             Arrays.fill(row, false);
         }
@@ -44,27 +69,84 @@ public class GameManager {
         for (boolean[] row : _staticBlocksMatrix) {
             Arrays.fill(row, false);
         }
+        new Thread(this).start();
+
     }
 
-    public synchronized void instantiateCurrentBlock() {
+    @Override
+    public void run() {
+
+        System.out.println("coucou from run");
+    }
+
+    private void playGame() {
+        System.out.println("coucou from playGame");
+        _lose = false;
+        int i = 0;
+        instantiateCurrentBlock();
+        while (!_lose) {
+            _gamePanel.loggingArea.setOnKeyPressed(keyEvent -> {
+                KeyCode e = keyEvent.getCode();
+                String message = getUserInput(e);
+                _gamePanel.loggingArea.setText(message);
+            });
+
+            if (i%15 == 0) moveDownCurrentBlock();
+            buildGameMatrix();
+            _gamePanel.displayGameMatrix(_gameMatrix);
+
+            detectGameOver();
+
+            try {
+                Thread.sleep(5);
+                i++;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        _gamePanel.loggingArea.setText("Game Over !");
+    }
+
+    private String getUserInput(KeyCode e) {
+        String message = "";
+        switch (e) {
+            case LEFT -> {
+                moveLateralCurrentBlock("LEFT");
+            }
+            case RIGHT -> {
+                moveLateralCurrentBlock("RIGHT");
+            }
+            case DOWN -> {
+                moveDownCurrentBlock();
+            }
+            case CONTROL -> {
+                rotateCurrentBlock();
+
+            }
+            default -> message = "Invalid key pressed";
+        }
+        return message;
+    }
+
+
+    private synchronized void instantiateCurrentBlock() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 6 + 1);
-        _currentBlock = new CurrentBlock(0, 0, _gameWidth, _gameHeight);
+        _currentBlock = new CurrentBlock(randomNum, 0, _gameWidth, _gameHeight);
         _currentBlockMatrix = _currentBlock.getGlobalBlockMatrix();
         detectGameOver();
 
     }
 
-    public synchronized boolean[][] getGameMatrices() {
+    private synchronized void buildGameMatrix() {
         for (int i = 0; i < _gameHeight; i++) {
             for (int j = 0; j < _gameWidth; j++) {
                 _gameMatrix[i][j] = _staticBlocksMatrix[i][j + CLIPPING_WIDTH] ||
                         _currentBlockMatrix[i][j + CLIPPING_WIDTH];
             }
         }
-        return _gameMatrix;
     }
 
-    public synchronized void rotateCurrentBlock() {
+    private synchronized void rotateCurrentBlock() {
         if (_currentBlock.getType() != 4) { // if not a "O" square element
             _currentBlockMatrix = _currentBlock.rotate();
             preventWallClipping();
@@ -74,7 +156,7 @@ public class GameManager {
         }
     }
 
-    public synchronized void moveLateralCurrentBlock(String input) {
+    private synchronized void moveLateralCurrentBlock(String input) {
         if (input.equals("LEFT")) {
             _currentBlockMatrix = _currentBlock.moveLeft();
         } else if (input.equals("RIGHT")) {
@@ -84,7 +166,7 @@ public class GameManager {
         preventLateralBlockClipping(input);
     }
 
-    public synchronized void moveDownCurrentBlock() {
+    private synchronized void moveDownCurrentBlock() {
         boolean isDockable;
         _currentBlockMatrix = _currentBlock.moveDown();
         boolean isDockable_pt1 = preventGroundClipping();
@@ -259,10 +341,6 @@ public class GameManager {
                 }
             }
         }
-    }
-
-    public boolean getGameOver() {
-        return _lose;
     }
 
     private void exitGame() {

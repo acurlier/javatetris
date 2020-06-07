@@ -1,17 +1,16 @@
 package com.user.io;
 
-import com.game.compute.GameManager;
 import javafx.animation.FillTransition;
 import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.JFXPanel;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -22,30 +21,25 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 
-public class GamePanel extends Application implements Runnable {
+public class GamePanel extends Application {
 
-    private final TextArea _loggingArea;
+    public final TextArea loggingArea;
     private final GridPane _root;
     private final GridPane _gameGrid;
     private final Label _KeyInput;
-    private TextField _KeyOutputPrint;
 
-    private final Button _startButton;
+    public final Button startButton;
 
-    private final int _gameScreenWidth = 18;
-    private final int _gameScreenHeight = 27;
+    private final int _gameScreenWidth = 18; //10
+    private final int _gameScreenHeight = 27; //40
 
-    private GameManager _gameM;
+    final JFXPanel fxPanel = new JFXPanel();
 
-    //public static void main(String[] args) {
-    // launch(args);
-    // }
-
-    public GamePanel()  {
-
+    public GamePanel() {
+        System.out.println("coucou from constructor (JAVAFX)");
         _root = new GridPane();
         _gameGrid = new GridPane();
-        _loggingArea = new TextArea("");
+        loggingArea = new TextArea("");
         _KeyInput = new Label("Keyboard Input:");
 
         Text sceneTitle = new Text("MainScene");
@@ -61,19 +55,17 @@ public class GamePanel extends Application implements Runnable {
         _gameGrid.setHgap(0);
         _gameGrid.setVgap(0);
 
-        _loggingArea.setEditable(false);
-        _loggingArea.setPrefHeight(50);
+        loggingArea.setEditable(false);
+        loggingArea.setPrefHeight(50);
 
         // add controls
-        _startButton = new Button("Click me");
+        startButton = new Button("Start Game");
 
-        //game manager
-        _gameM = new GameManager(_gameScreenWidth, _gameScreenHeight, 0.5f);
     }
 
     @Override
     public void start(Stage primaryStage) {
-
+        System.out.println("coucou from start (JAVAFX)");
         ///////SETUP THE STAGE
         primaryStage.setTitle("JAVATetris");
 
@@ -85,51 +77,30 @@ public class GamePanel extends Application implements Runnable {
         generateGameGrid(_gameScreenHeight, _gameScreenWidth);
 
         _root.add(_KeyInput, 0, 0);
-        _root.add(_loggingArea, 0, 1);
+        _root.add(loggingArea, 0, 1);
         _root.add(_gameGrid, 0, 2);
-        _root.add(_startButton, 0, 3);
+        _root.add(startButton, 0, 3);
 
         Scene scene = new Scene(_root, 350, 550); // width & height
-        _startButton.requestFocus();
+        startButton.requestFocus();
 
         ///////CONFIGURE UI EVENT HANDLING
 
-        _loggingArea.setOnKeyPressed(keyEvent -> {
-            switch (keyEvent.getCode()) { // TODO expose keyEvent to gamemanager
-                case UP -> {
-                    _loggingArea.setText("UP key press detected");
-                }
-                case LEFT -> {
-                    _loggingArea.setText("LEFT key press detected");
-                    _gameM.moveLateralCurrentBlock("LEFT");
-                }
-                case RIGHT -> {
-                    _loggingArea.setText("RIGHT key press detected");
-                    _gameM.moveLateralCurrentBlock("RIGHT");
-                }
-                case DOWN -> {
-                    _loggingArea.setText("DOWN key press detected");
-                    _gameM.moveDownCurrentBlock();
-                }
-                case SPACE -> _loggingArea.setText("SPACE key press detected");
-                case CONTROL -> {
-                    _loggingArea.setText("CTRL key press detected");
-                    _gameM.rotateCurrentBlock();
+//        loggingArea.setOnKeyPressed(keyEvent -> {
+//            KeyCode e = keyEvent.getCode();
+//            String message = _gameM.getUserInput(e);
+//            loggingArea.setText(message);
+//        });
 
-                }
-                default -> _loggingArea.setText("Invalid key pressed");
-            }
-        });
-
-        _startButton.setOnAction(actionEvent -> { // TODO move to gamemanager
-            //animateGameGrid();
-            try {
-                playGame();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            _loggingArea.requestFocus();
-        });
+//        startButton.setOnAction(actionEvent -> {
+//            //animateGameGrid();
+//            try {
+//                playGame();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            loggingArea.requestFocus();
+//        });
 
         ///////DISPLAY UI
         primaryStage.setScene(scene);
@@ -153,16 +124,7 @@ public class GamePanel extends Application implements Runnable {
         }
     }
 
-    private void playGame() throws InterruptedException {
-        boolean lose = false;
-        _gameM.instantiateCurrentBlock();
-        new Thread(this).start();
-
-        }
-
-    private void displayGameMatrix() {
-
-        boolean[][] gameMatrix = _gameM.getGameMatrices();
+    public void displayGameMatrix(boolean[][] gameMatrix) {
 
         ObservableList<Node> tileList = _gameGrid.getChildren();
         for (int i = 0; i < _gameScreenHeight; i++) {
@@ -214,35 +176,5 @@ public class GamePanel extends Application implements Runnable {
             }
         }
         return sequenceBlink;
-    }
-
-    /**
-     * When an object implementing interface {@code Runnable} is used
-     * to create a thread, starting the thread causes the object's
-     * {@code run} method to be called in that separately executing
-     * thread.
-     * <p>
-     * The general contract of the method {@code run} is that it may
-     * take any action whatsoever.
-     *
-     * @see Thread#run()
-     */
-    @Override
-    public void run() {
-        boolean lose = false;
-        int i = 0;
-        while (!lose) {
-            if (i%15 == 0) _gameM.moveDownCurrentBlock();
-
-            displayGameMatrix();
-            lose = _gameM.getGameOver();
-            try {
-                Thread.sleep(1);
-                i++;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        _loggingArea.setText("Game Over !");
     }
 }
