@@ -5,6 +5,7 @@ import javafx.animation.FillTransition;
 import javafx.animation.SequentialTransition;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -19,6 +20,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 
@@ -36,6 +38,8 @@ public class GamePanel extends Application implements Runnable {
     private final int _gameScreenHeight = 27;
 
     private GameManager _gameM;
+
+    private boolean isRunning = true;
 
     //public static void main(String[] args) {
     // launch(args);
@@ -131,6 +135,13 @@ public class GamePanel extends Application implements Runnable {
             _loggingArea.requestFocus();
         });
 
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t) {
+                isRunning = false;
+            }
+        });
+
         ///////DISPLAY UI
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -220,7 +231,7 @@ public class GamePanel extends Application implements Runnable {
     public void run() {
         boolean lose = false;
         int i = 0;
-        while (!lose) {
+        while (!lose && isRunning) {
             if (i%45 == 0) _gameM.moveDownCurrentBlock();
 
             displayGameMatrix();
@@ -232,6 +243,11 @@ public class GamePanel extends Application implements Runnable {
                 e.printStackTrace();
             }
         }
-        _loggingArea.setText("Game Over !");
+
+        if(isRunning) {
+            _loggingArea.setText("Game Over !");
+        } else {
+            System.out.println("Bye bye");
+        }
     }
 }
