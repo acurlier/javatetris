@@ -30,7 +30,8 @@ public class GamePanel extends Application implements Runnable {
     private final GridPane _root;
     private final GridPane _gameGrid;
     private final Label _KeyInput;
-    private TextField _KeyOutputPrint;
+    private final Label _ScoreLabel;
+    private TextArea _ScoreField;
 
     private final Button _startButton;
 
@@ -51,6 +52,8 @@ public class GamePanel extends Application implements Runnable {
         _gameGrid = new GridPane();
         _loggingArea = new TextArea("");
         _KeyInput = new Label("Keyboard Input:");
+        _ScoreLabel = new Label("Score:");
+        _ScoreField = new TextArea("");
 
         Text sceneTitle = new Text("MainScene");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
@@ -92,6 +95,8 @@ public class GamePanel extends Application implements Runnable {
         _root.add(_loggingArea, 0, 1);
         _root.add(_gameGrid, 0, 2);
         _root.add(_startButton, 0, 3);
+        _root.add(_ScoreLabel, 1, 3);
+        _root.add(_ScoreField, 2, 3);
 
         Scene scene = new Scene(_root, 350, 550); // width & height
         _startButton.requestFocus();
@@ -232,7 +237,7 @@ public class GamePanel extends Application implements Runnable {
         boolean lose = false;
         int i = 0;
         while (!lose && isRunning) {
-            if (i%45 == 0) _gameM.moveDownCurrentBlock();
+            if (i%25 == 0) _gameM.moveDownCurrentBlock();
 
             displayGameMatrix();
             lose = _gameM.getGameOver();
