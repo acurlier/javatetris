@@ -48,7 +48,7 @@ public class GameManager {
 
     public synchronized void instantiateCurrentBlock() {
         int randomNum = ThreadLocalRandom.current().nextInt(0, 6 + 1);
-        _currentBlock = new CurrentBlock(0, 0, _gameWidth, _gameHeight);
+        _currentBlock = new CurrentBlock(randomNum, 0, _gameWidth, _gameHeight);
         _currentBlockMatrix = _currentBlock.getGlobalBlockMatrix();
         detectGameOver();
 
