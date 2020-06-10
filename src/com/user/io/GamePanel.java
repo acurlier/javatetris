@@ -7,13 +7,14 @@ import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -29,16 +30,17 @@ public class GamePanel extends Application implements Runnable {
     private final TextArea _loggingArea;
     private final GridPane _root;
     private final GridPane _gameGrid;
-    private final Label _KeyInput;
+    private final Label _gameMessageLabel;
     private final Label _ScoreLabel;
-    private TextArea _ScoreField;
+    private final TextArea _ScoreField;
+    private final HBox _bottomVBox;
 
     private final Button _startButton;
 
-    private final int _gameScreenWidth = 18;
+    private final int _gameScreenWidth = 15;
     private final int _gameScreenHeight = 27;
 
-    private GameManager _gameM;
+    private final GameManager _gameM;
 
     private boolean isRunning = true;
 
@@ -46,14 +48,26 @@ public class GamePanel extends Application implements Runnable {
     // launch(args);
     // }
 
-    public GamePanel()  {
+    public GamePanel() {
 
         _root = new GridPane();
         _gameGrid = new GridPane();
+
         _loggingArea = new TextArea("");
-        _KeyInput = new Label("Keyboard Input:");
+        _gameMessageLabel = new Label("Game Output");
+        _gameMessageLabel.setFont(Font.font("Tahoma", 18));
+
         _ScoreLabel = new Label("Score:");
+        _ScoreLabel.setFont(Font.font("Tahoma", 18));
+
         _ScoreField = new TextArea("");
+        _ScoreField.setEditable(false);
+        _ScoreField.setPrefHeight(3);
+        _ScoreField.setPrefWidth(70);
+
+        _startButton = new Button("Start Game");
+        _bottomVBox = new HBox(12);
+
 
         Text sceneTitle = new Text("MainScene");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
@@ -63,16 +77,16 @@ public class GamePanel extends Application implements Runnable {
         _root.setHgap(10);
         _root.setVgap(10);
 
+        //configure the bottom VBox
+        _bottomVBox.setPadding(new Insets(5, 5, 5, 5));
+
         //configure the game grid
         _gameGrid.setPadding(new Insets(5, 5, 5, 5));
         _gameGrid.setHgap(0);
         _gameGrid.setVgap(0);
 
         _loggingArea.setEditable(false);
-        _loggingArea.setPrefHeight(50);
 
-        // add controls
-        _startButton = new Button("Click me");
 
         //game manager
         _gameM = new GameManager(_gameScreenWidth, _gameScreenHeight, 0.5f);
@@ -91,47 +105,50 @@ public class GamePanel extends Application implements Runnable {
         _gameGrid.setPrefSize(gameGridSizeX, gameGridSizeY);
         generateGameGrid(_gameScreenHeight, _gameScreenWidth);
 
-        _root.add(_KeyInput, 0, 0);
+        _root.add(_gameMessageLabel, 0, 0);
         _root.add(_loggingArea, 0, 1);
-        _root.add(_gameGrid, 0, 2);
-        _root.add(_startButton, 0, 3);
-        _root.add(_ScoreLabel, 1, 3);
-        _root.add(_ScoreField, 2, 3);
 
-        Scene scene = new Scene(_root, 350, 550); // width & height
+        _root.add(_gameGrid, 0, 2);
+
+        _bottomVBox.getChildren().addAll(_startButton, _ScoreLabel, _ScoreField);
+        _bottomVBox.setAlignment(Pos.CENTER);
+        _root.add(_bottomVBox, 0, 3);
+
+        Scene scene = new Scene(_root, 330, 575); // width & height
         _startButton.requestFocus();
 
         ///////CONFIGURE UI EVENT HANDLING
 
         _loggingArea.setOnKeyPressed(keyEvent -> {
-            switch (keyEvent.getCode()) { // TODO expose keyEvent to gamemanager
-                case UP -> {
-                    _loggingArea.setText("UP key press detected");
-                }
-                case LEFT -> {
-                    _loggingArea.setText("LEFT key press detected");
+            switch (keyEvent.getCode()) {
+                case LEFT: {
+                    _loggingArea.setText("Move left");
                     _gameM.moveLateralCurrentBlock("LEFT");
+                    break;
                 }
-                case RIGHT -> {
-                    _loggingArea.setText("RIGHT key press detected");
+                case RIGHT: {
+                    _loggingArea.setText("Move right");
                     _gameM.moveLateralCurrentBlock("RIGHT");
+                    break;
                 }
-                case DOWN -> {
-                    _loggingArea.setText("DOWN key press detected");
+                case DOWN: {
+                    _loggingArea.setText("Fast downward");
                     _gameM.moveDownCurrentBlock();
+                    break;
                 }
-                case SPACE -> _loggingArea.setText("SPACE key press detected");
-                case CONTROL -> {
-                    _loggingArea.setText("CTRL key press detected");
+
+                case CONTROL: {
+                    _loggingArea.setText("rotate block");
                     _gameM.rotateCurrentBlock();
+                    break;
 
                 }
-                default -> _loggingArea.setText("Invalid key pressed");
+                default:
+                    _loggingArea.setText("Invalid key pressed");
             }
         });
 
-        _startButton.setOnAction(actionEvent -> { // TODO move to gamemanager
-            //animateGameGrid();
+        _startButton.setOnAction(actionEvent -> {
             try {
                 playGame();
             } catch (InterruptedException e) {
@@ -174,7 +191,7 @@ public class GamePanel extends Application implements Runnable {
         _gameM.instantiateCurrentBlock();
         new Thread(this).start();
 
-        }
+    }
 
     private void displayGameMatrix() {
 
@@ -196,6 +213,12 @@ public class GamePanel extends Application implements Runnable {
                 }
             }
         }
+    }
+
+    private void displayScore() {
+        String score;
+        score = String.valueOf(_gameM.getScore());
+        _ScoreField.setText(score);
     }
 
     private void animateGameGrid() {
@@ -237,8 +260,8 @@ public class GamePanel extends Application implements Runnable {
         boolean lose = false;
         int i = 0;
         while (!lose && isRunning) {
-            if (i%25 == 0) _gameM.moveDownCurrentBlock();
-
+            if (i % 50 == 0) _gameM.moveDownCurrentBlock();
+            displayScore();
             displayGameMatrix();
             lose = _gameM.getGameOver();
             try {
@@ -249,7 +272,7 @@ public class GamePanel extends Application implements Runnable {
             }
         }
 
-        if(isRunning) {
+        if (isRunning) {
             _loggingArea.setText("Game Over !");
         } else {
             System.out.println("Bye bye");

@@ -209,13 +209,30 @@ public class GameManager {
     4 lines : 1200
      */
         switch (numberLine) {
-            case 1 -> _score += 40;
-            case 2 -> _score += 100;
-            case 3 -> _score += 300;
-            case 4 -> _score += 1200;
-            default -> _score += 0;
+            case 1: {
+                _score += 40;
+                break;
+            }
+            case 2: {
+                _score += 100;
+                break;
+            }
+            case 3: {
+                _score += 300;
+                break;
+            }
+            case 4: {
+                _score += 1200;
+                break;
+            }
+            default: {
+                _score += 0;
+            }
         }
-        System.out.println("New score : " + _score);
+    }
+
+    public int getScore() {
+        return _score;
     }
 
     private void checkLineClear() {// detectContact() {
@@ -227,7 +244,7 @@ public class GameManager {
         for (boolean[] line : _staticBlocksMatrix) {
 
             boolean completeLine = true;
-            for (int k = CLIPPING_WIDTH; k< line.length-CLIPPING_WIDTH; k++) {
+            for (int k = CLIPPING_WIDTH; k < line.length - CLIPPING_WIDTH; k++) {
                 if (!line[k]) {
                     completeLine = false;
                 }
