@@ -66,7 +66,7 @@ public class GenericBlock {
         rotating a square matrix is equivalent to transposing it then getting its image by
         symetry along the vertical axis
          */
-        _blockMatrix = _transposeBlock(_symAxis1Block(_blockMatrix));
+        _blockMatrix = transposeBlock(symAxis1Block(_blockMatrix));
 
     }
 
@@ -75,12 +75,12 @@ public class GenericBlock {
         rotating a square matrix is equivalent to transposing it then getting its image by
         symetry along the vertical axis
          */
-        boolean[][] temp = _transposeBlock(_symAxis1Block(matrix));
+        boolean[][] temp = transposeBlock(symAxis1Block(matrix));
         return temp;
 
     }
 
-    protected boolean[][] _transposeBlock(boolean[][] matrix) {
+    protected boolean[][] transposeBlock(boolean[][] matrix) {
         /*
         this matrix yields the transposed of the _blockMatrix
          */
@@ -93,7 +93,7 @@ public class GenericBlock {
         return temp;
     }
 
-    protected boolean[][] _symAxis1Block(boolean[][] matrix) {
+    protected boolean[][] symAxis1Block(boolean[][] matrix) {
         /*
         this (not so elegant) methods get the symetric of the _blockMatrix along the vertical axis
         it is not generalized to n*m matrices --> will work only for 3x3

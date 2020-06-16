@@ -25,11 +25,11 @@ public class CurrentBlock extends GenericBlock {
         _globalBlockMatrix =
                 new boolean[_gameHeight + CLIPPING_WIDTH][_gameWidth + 2 * CLIPPING_WIDTH];
 
-        _resetGlobalBlockMatrix();
+        resetGlobalBlockMatrix();
 
     }
 
-    private void _resetGlobalBlockMatrix() {
+    private void resetGlobalBlockMatrix() {
 
         for (boolean[] row : _globalBlockMatrix) {
             Arrays.fill(row, false);
@@ -82,7 +82,7 @@ public class CurrentBlock extends GenericBlock {
     For a rotation: translate the block in order to have a rotation along the center of gravity (and not along
     the (0,0) cell)
      */
-        _resetGlobalBlockMatrix();
+        resetGlobalBlockMatrix();
         int startRowIndex;
         int startColumnsIndex;
 
