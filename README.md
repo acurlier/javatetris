@@ -87,7 +87,7 @@ The following diagram represents the classes which are implemented in Java. The 
 correspond to future use cases and have not been coded as of now.
 
 
-![logo](Illustrations/ClassDIagram.png)
+![logo](Illustrations/ClassDiagram.png)
 
 ### Technical considerations
 The GUI framework is javafx. JavaFX is not included anymore in
